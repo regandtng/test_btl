@@ -90,9 +90,9 @@
                 <div class="footer-links">
                     <h4 class="footer-heading">Hỗ Trợ Khách Hàng</h4>
                     <ul style="list-style: none; padding: 0; margin: 0; font-size: 0.9rem; color: #cbd5e1;">
-                        <li style="margin-bottom: 0.5rem;">Hotline: 1900 6868</li>
+                        <li style="margin-bottom: 0.5rem;">Hotline: 0976779516</li>
                         <li style="margin-bottom: 0.5rem;">Email: support@smashzone.vn</li>
-                        <li style="margin-bottom: 0.5rem;">Trụ sở: Quận 1, TP. Hồ Chí Minh</li>
+                        <li style="margin-bottom: 0.5rem;">Trụ sở: Số 4B, ngách 71, ngõ 83 Tân triều, Hà Nội</li>
                     </ul>
                 </div>
             </div>
