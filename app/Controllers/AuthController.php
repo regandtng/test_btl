@@ -132,4 +132,110 @@ class AuthController extends Controller
         Session::flash('success', 'Đã đăng xuất thành công.');
         $this->redirect('/');
     }
+
+    // ─────────────────── CUSTOMER PROFILE ───────────────────
+
+    public function profile()
+    {
+        $userId = Session::get('user_id');
+        if (!$userId) {
+            Session::set('intended_url', '/profile');
+            $this->redirect('/login');
+        }
+
+        $userModel = new User();
+        $user = $userModel->findById($userId);
+
+        if (!$user) {
+            Session::flash('error', 'Không tìm thấy tài khoản.');
+            $this->redirect('/logout');
+        }
+
+        $this->render('auth/profile', [
+            'title' => 'Hồ Sơ Cá Nhân - SmashZone',
+            'user'  => $user,
+        ]);
+    }
+
+    public function updateProfile()
+    {
+        $userId = Session::get('user_id');
+        if (!$userId) {
+            $this->redirect('/login');
+        }
+
+        $name  = trim($_POST['name'] ?? '');
+        $email = trim($_POST['email'] ?? '');
+        $phone = trim($_POST['phone'] ?? '');
+
+        $errors = [];
+        if (empty($name))    $errors[] = 'Vui lòng nhập họ tên.';
+        if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = 'Email không hợp lệ.';
+        if (empty($phone) || !preg_match('/^[0-9]{10,11}$/', $phone)) $errors[] = 'Số điện thoại không hợp lệ.';
+
+        if (!empty($errors)) {
+            Session::flash('error', implode('<br>', $errors));
+            $this->redirect('/profile');
+        }
+
+        $db = Database::getInstance();
+        
+        // Check email unique
+        $existing = $db->query('SELECT id FROM users WHERE email = ? AND id != ?', [$email, $userId])->fetch();
+        if ($existing) {
+            Session::flash('error', 'Email này đã được sử dụng bởi tài khoản khác.');
+            $this->redirect('/profile');
+        }
+
+        // Check phone unique
+        $existing = $db->query('SELECT id FROM users WHERE phone = ? AND id != ?', [$phone, $userId])->fetch();
+        if ($existing) {
+            Session::flash('error', 'Số điện thoại này đã được sử dụng bởi tài khoản khác.');
+            $this->redirect('/profile');
+        }
+
+        $db->query('UPDATE users SET name = ?, email = ?, phone = ? WHERE id = ?', [$name, $email, $phone, $userId]);
+
+        Session::set('user_name', $name);
+        Session::set('user_email', $email);
+        Session::flash('success', 'Đã cập nhật thông tin cá nhân.');
+        $this->redirect('/profile');
+    }
+
+    public function changePassword()
+    {
+        $userId = Session::get('user_id');
+        if (!$userId) {
+            $this->redirect('/login');
+        }
+
+        $currentPassword = $_POST['current_password'] ?? '';
+        $newPassword     = $_POST['new_password'] ?? '';
+        $confirmPassword = $_POST['confirm_password'] ?? '';
+
+        $errors = [];
+        if (empty($currentPassword)) $errors[] = 'Vui lòng nhập mật khẩu hiện tại.';
+        if (empty($newPassword))     $errors[] = 'Vui lòng nhập mật khẩu mới.';
+        if (strlen($newPassword) < 6) $errors[] = 'Mật khẩu mới tối thiểu 6 ký tự.';
+        if ($newPassword !== $confirmPassword) $errors[] = 'Mật khẩu xác nhận không khớp.';
+
+        if (!empty($errors)) {
+            Session::flash('error', implode('<br>', $errors));
+            $this->redirect('/profile');
+        }
+
+        $db = Database::getInstance();
+        $user = $db->query('SELECT password FROM users WHERE id = ?', [$userId])->fetch(\PDO::FETCH_ASSOC);
+
+        if (!$user || !password_verify($currentPassword, $user['password'])) {
+            Session::flash('error', 'Mật khẩu hiện tại không đúng.');
+            $this->redirect('/profile');
+        }
+
+        $newHash = password_hash($newPassword, PASSWORD_DEFAULT);
+        $db->query('UPDATE users SET password = ? WHERE id = ?', [$newHash, $userId]);
+
+        Session::flash('success', 'Đã đổi mật khẩu thành công.');
+        $this->redirect('/profile');
+    }
 }

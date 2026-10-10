@@ -8,9 +8,9 @@
 
 ---
 
-## ✨ Tính Năng
+## Tính Năng
 
-### 👥 Khách Hàng
+###  Khách Hàng
 - Xem danh sách 13 chi nhánh với bộ lọc theo thành phố và tìm kiếm
 - Xem chi tiết 10 sân tại mỗi chi nhánh
 - **Đặt sân theo giờ** với timeline trực quan (sân trống / đã đặt)
@@ -19,7 +19,7 @@
 - Nhận **mã đặt sân** unique (BB-YYYYMMDD-XXXXX)
 - Xem lịch sử đặt sân (theo tài khoản hoặc số điện thoại)
 
-### 🔧 Quản Trị (Admin / Owner)
+###  Quản Trị (Admin / Owner)
 - Dashboard thống kê: lượt đặt hôm nay, doanh thu, biểu đồ 7 ngày
 - Quản lý chi nhánh và sân (CRUD)
 - Quản lý lịch đặt: lọc theo ngày/chi nhánh/trạng thái, cập nhật trạng thái
@@ -28,7 +28,7 @@
 
 ---
 
-## 🏗️ Kiến Trúc Dự Án
+##  Kiến Trúc Dự Án
 
 ```
 BadmintonBooking/
@@ -76,7 +76,7 @@ BadmintonBooking/
 
 ---
 
-## ⚙️ Yêu Cầu Hệ Thống
+##  Yêu Cầu Hệ Thống
 
 - **PHP** >= 8.1
 - **MySQL** >= 8.0
@@ -85,7 +85,7 @@ BadmintonBooking/
 
 ---
 
-## 🚀 Cài Đặt
+##  Cài Đặt
 
 ### 1. Clone / Copy dự án
 

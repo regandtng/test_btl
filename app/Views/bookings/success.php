@@ -5,12 +5,12 @@
     <div class="container" style="max-width:640px;">
         <div class="card p-5 text-center">
             <div class="success-badge">✓</div>
-            <h1 class="h2 text-accent mb-2">ĐẶT SÂN THÀNH CÔNG!</h1>
+            <h1 class="h2 text-accent mb-2">GỬI YÊU CẦU THÀNH CÔNG!</h1>
             <p class="text-muted">
                 <?php if ($isCash): ?>
-                    Đặt sân đã được ghi nhận. Vui lòng thanh toán tiền mặt tại sân khi đến nhận sân.
+                    Yêu cầu đặt sân đã được ghi nhận. Vui lòng thanh toán tiền mặt tại sân khi đến nhận sân.
                 <?php else: ?>
-                    Thanh toán thành công. Cảm ơn bạn đã đặt sân tại SmashZone.
+                    Yêu cầu thanh toán đã được gửi. Cảm ơn bạn đã đặt sân tại SmashZone.
                 <?php endif; ?>
             </p>
 
@@ -36,7 +36,7 @@
                     <div class="font-weight-700 text-blue"><?= htmlspecialchars(isset($booking['start_time']) ? substr($booking['start_time'],0,5) . ' - ' . substr($booking['end_time'],0,5) : ($time ?? '—')) ?></div>
                 </div>
                 <div style="grid-column: span 2; text-align: center; margin-top: 0.5rem;">
-                    <small class="text-muted"><?= $isCash ? 'Số tiền cần thanh toán tại sân' : 'Tổng tiền đã thanh toán' ?></small>
+                    <small class="text-muted"><?= $isCash ? 'Số tiền cần thanh toán tại sân' : 'Tổng tiền yêu cầu' ?></small>
                     <div class="text-accent" style="font-weight:800; font-size:1.5rem;"><?= number_format($booking['total_price'] ?? ($price ?? 0)) ?>đ</div>
                 </div>
             </div>

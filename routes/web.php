@@ -27,6 +27,11 @@ $router->get('/register', 'AuthController@registerForm');
 $router->post('/register', 'AuthController@register');
 $router->get('/logout', 'AuthController@logout');
 
+// Profile Routes (customer)
+$router->get('/profile', 'AuthController@profile');
+$router->post('/profile/update', 'AuthController@updateProfile');
+$router->post('/profile/change-password', 'AuthController@changePassword');
+
 // Owner Routes
 $router->get('/owner/login', 'OwnerController@loginForm');
 $router->post('/owner/login', 'OwnerController@login');

@@ -58,21 +58,31 @@ class Booking extends Model {
     public function isSlotAvailable($courtId, $date, $startTime, $endTime) {
         $stmt = $this->db->prepare("
             SELECT COUNT(*) as cnt FROM {$this->table} 
-            WHERE court_id = ? AND booking_date = ? AND status IN ('pending', 'confirmed')
+            WHERE court_id = ? AND booking_date = ? AND status IN ('confirmed', 'completed')
             AND ((start_time < ? AND end_time > ?) OR (start_time >= ? AND start_time < ?))
+            OR (court_id = ? AND booking_date = ? AND status = 'pending' AND expires_at > NOW()
+                AND ((start_time < ? AND end_time > ?) OR (start_time >= ? AND start_time < ?)))
         ");
-        $stmt->execute([$courtId, $date, $endTime, $startTime, $startTime, $endTime]);
+        $stmt->execute([
+            $courtId, $date, $endTime, $startTime, $startTime, $endTime,
+            $courtId, $date, $endTime, $startTime, $startTime, $endTime
+        ]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         return $row['cnt'] == 0;
     }
 
     /**
      * Return the list of booked hour marks (integers) for a court on a given date.
+     * Excludes expired pending bookings.
      */
     public function getBookedSlots($courtId, $date) {
         $stmt = $this->db->prepare("
             SELECT start_time, end_time FROM {$this->table}
-            WHERE court_id = ? AND booking_date = ? AND status IN ('pending', 'confirmed')
+            WHERE court_id = ? AND booking_date = ? 
+            AND (
+                status IN ('confirmed', 'completed')
+                OR (status = 'pending' AND expires_at > NOW())
+            )
         ");
         $stmt->execute([$courtId, $date]);
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -133,5 +143,37 @@ class Booking extends Model {
         $stmt->execute([$branchId]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         return $row['total_revenue'] ?: 0;
+    }
+
+    /**
+     * Auto-complete confirmed bookings where end_time has passed (session timeout).
+     * Call via cron job every 5-10 minutes.
+     */
+    public function autoCompleteEndedSessions() {
+        $stmt = $this->db->prepare("
+            UPDATE {$this->table} 
+            SET status = 'completed' 
+            WHERE status = 'confirmed' 
+            AND CONCAT(booking_date, ' ', end_time) < NOW()
+        ");
+        $stmt->execute();
+        return $stmt->rowCount();
+    }
+
+    /**
+     * Clean up expired pending bookings (backup for missed payment page redirects).
+     * Call via cron job every 1-2 minutes.
+     */
+    public function cleanExpiredPending() {
+        $stmt = $this->db->prepare("
+            UPDATE {$this->table} 
+            SET status = 'cancelled',
+                notes = CONCAT(COALESCE(notes, ''), ' | Auto cancel: quá hạn thanh toán')
+            WHERE status = 'pending' 
+            AND expires_at IS NOT NULL 
+            AND expires_at < NOW()
+        ");
+        $stmt->execute();
+        return $stmt->rowCount();
     }
 }

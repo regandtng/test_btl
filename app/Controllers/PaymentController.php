@@ -6,6 +6,7 @@ use Core\Controller;
 use App\Models\Booking;
 use App\Models\Payment;
 use Core\Session;
+use DateTime;
 
 class PaymentController extends Controller
 {
@@ -22,6 +23,22 @@ class PaymentController extends Controller
 
         if ($booking['status'] === 'confirmed') {
             $this->redirect("/booking/success/{$bookingId}");
+        }
+
+        // Kiểm tra booking pending đã hết hạn (3 phút)
+        if ($booking['status'] === 'pending' && $booking['expires_at']) {
+            $now = new DateTime();
+            $expires = new DateTime($booking['expires_at']);
+            if ($now >= $expires) {
+                // Auto cancel booking hết hạn
+                $bookingModel->update($bookingId, [
+                    'status' => 'cancelled',
+                    'notes' => ($booking['notes'] ? $booking['notes'] . ' | ' : '') . 'Auto cancel: quá hạn thanh toán 3 phút'
+                ]);
+                Session::set('pending_booking', null);
+                Session::flash('error', 'Đã quá 3 phút thanh toán. Đơn đặt sân đã bị hủy tự động, sân đã được giải phóng.');
+                $this->redirect('/branches');
+            }
         }
 
         $paymentMethods = [
@@ -56,6 +73,20 @@ class PaymentController extends Controller
         if (!$booking) {
             Session::flash('error', 'Không tìm thấy đặt sân.');
             $this->redirect('/');
+        }
+
+        // Kiểm tra booking pending đã hết hạn
+        if ($booking['status'] === 'pending' && $booking['expires_at']) {
+            $now = new DateTime();
+            $expires = new DateTime($booking['expires_at']);
+            if ($now >= $expires) {
+                $bookingModel->update($bookingId, [
+                    'status' => 'cancelled',
+                    'notes' => ($booking['notes'] ? $booking['notes'] . ' | ' : '') . 'Auto cancel: quá hạn thanh toán 3 phút'
+                ]);
+                Session::flash('error', 'Đã quá 3 phút thanh toán. Đơn đặt sân đã bị hủy tự động.');
+                $this->redirect('/branches');
+            }
         }
 
         // Create payment record

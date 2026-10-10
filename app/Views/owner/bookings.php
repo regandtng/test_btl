@@ -100,7 +100,7 @@ th { background: rgba(0,0,0,0.3); color: #2979ff; font-size: 13px; text-transfor
                         <form action="<?= BASE_URL ?>/owner/booking/update" method="POST" style="margin:0;">
                             <input type="hidden" name="id" value="<?= $b['id'] ?>">
                             <select name="status" class="status-select <?= strtolower($b['status']) ?>" onchange="this.form.submit()">
-                                <option value="pending" <?= $b['status']=='pending'?'selected':'' ?>>Chờ xác nhận</option>
+                                <option value="pending" <?= $b['status']=='pending'?'selected':'' ?>>Chờ thanh toán</option>
                                 <option value="confirmed" <?= $b['status']=='confirmed'?'selected':'' ?>>Đã xác nhận</option>
                                 <option value="completed" <?= $b['status']=='completed'?'selected':'' ?>>Hoàn thành</option>
                                 <option value="cancelled" <?= $b['status']=='cancelled'?'selected':'' ?>>Đã hủy</option>
