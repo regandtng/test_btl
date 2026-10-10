@@ -1,62 +1,105 @@
-# 🏸 SmashZone — Hệ Thống Đặt Sân Cầu Lông Online
+# SmashZone — He Thong Dat San Cau Long Online
 
-> Website đặt sân cầu lông trực tuyến với 13 chi nhánh, 130 sân, hỗ trợ đặt sân 24/7.
-
-![PHP](https://img.shields.io/badge/PHP-8.1+-777BB4?style=flat-square&logo=php)
-![MySQL](https://img.shields.io/badge/MySQL-8.0+-4479A1?style=flat-square&logo=mysql)
-![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
+> Website dat san cau long truc tuyen voi 13 chi nhanh, 130 san, ho tro dat san 24/7.
 
 ---
 
-## Tính Năng
+## Tinh Nang
 
-###  Khách Hàng
-- Xem danh sách 13 chi nhánh với bộ lọc theo thành phố và tìm kiếm
-- Xem chi tiết 10 sân tại mỗi chi nhánh
-- **Đặt sân theo giờ** với timeline trực quan (sân trống / đã đặt)
-- Xác nhận thông tin khách hàng
-- Thanh toán qua **QR ngân hàng**, **MoMo** hoặc **tiền mặt tại sân**
-- Nhận **mã đặt sân** unique (BB-YYYYMMDD-XXXXX)
-- Xem lịch sử đặt sân (theo tài khoản hoặc số điện thoại)
+### Khach Hang
+- Xem danh sach 13 chi nhanh voi bo loc theo thanh pho va tim kiem
+- Xem chi tiet 10 san tai moi chi nhanh
+- **Dat san theo gio** voi timeline truc quan (san trong / da dat)
+- Xac nhan thong tin khach hang
+- Thanh toan qua **QR ngan hang**, **MoMo** hoac **tien mat tai san**
+- Nhan **ma dat san** unique (BB-YYYYMMDD-XXXXX)
+- Xem lich su dat san (theo tai khoan hoac so dien thoai)
+- **Ho so ca nhan**: Cap nhat ten/email/SDT, doi mat khau
+- **Thanh toan co thoi han 3 phut**: Countdown timer, qua han tu huy + giai phong san
 
-###  Quản Trị (Admin / Owner)
-- Dashboard thống kê: lượt đặt hôm nay, doanh thu, biểu đồ 7 ngày
-- Quản lý chi nhánh và sân (CRUD)
-- Quản lý lịch đặt: lọc theo ngày/chi nhánh/trạng thái, cập nhật trạng thái
-- Quản lý bảng giá theo khung giờ và loại ngày
-- Xem doanh thu theo tháng, theo chi nhánh (Chart.js)
+### Quan Tri (Admin / Owner)
+- Dashboard thong ke: luot dat hom nay, doanh thu, bieu do 7 ngay
+- Quan ly chi nhanh va san (CRUD)
+- Quan ly lich dat: loc theo ngay/chi nhanh/trang thai, cap nhat trang thai
+- Quan ly bang gia theo khung gio va loai ngay
+- Xem doanh thu theo thang, theo chi nhanh (Chart.js)
+- **Workflow trang thai ro rang**: Pending (cho thanh toan) -> Confirmed (da xac nhan) -> Completed (tu dong sau gio choi)
 
 ---
 
-##  Kiến Trúc Dự Án
+## Logic Trang Thai Booking
+
+```
+PENDING (3 phut) 
+    | Chon san, dien thong tin, cho thanh toan
+    | Countdown 3:00 -> 0:00
+    | Het gio = AUTO CANCEL + Giai phong san
+    v
+CONFIRMED
+    | Da thanh toan (QR/MoMo/COD)
+    | San khoa chac chan
+    v
+COMPLETED (Tu dong)
+    | Het gio choi (end_time < NOW)
+    | Cron chay 5-10p/l tu chuyen
+    v
+CANCELLED
+    | Huy boi khach/admin/auto-expired
+```
+
+---
+
+## Cron Job (Tu dong hoa)
+
+File: `cron.php` — Chay dinh ky 5-10 phut/lan qua Windows Task Scheduler
+
+| Chuc nang | SQL |
+|-----------|-----|
+| **Auto-complete** | `confirmed` + `end_time < NOW()` -> `completed` |
+| **Cleanup pending** | `pending` + `expires_at < NOW()` -> `cancelled` |
+
+**Cai dat Windows Task Scheduler:**
+- Program: `C:\xampp\php\php.exe`
+- Arguments: `C:\xampp\htdocs\test_btl\cron.php --all`
+- Start in: `C:\xampp\htdocs\test_btl`
+- Trigger: Daily -> Repeat every **5 minutes** -> Duration: **1 day**
+
+Test thu cong:
+```bash
+C:\xampp\php\php.exe C:\xampp\htdocs\test_btl\cron.php --all
+```
+
+---
+
+## Kien Truc Du An
 
 ```
 BadmintonBooking/
 ├── app/
 │   ├── Controllers/
 │   │   ├── HomeController.php
-│   │   ├── AuthController.php
+│   │   ├── AuthController.php      (Login, Register, Profile, ChangePassword)
 │   │   ├── BranchController.php
 │   │   ├── BookingController.php
-│   │   ├── PaymentController.php
+│   │   ├── PaymentController.php   (Countdown 3p, auto expire)
 │   │   └── OwnerController.php
 │   ├── Models/
 │   │   ├── User.php
 │   │   ├── Branch.php
 │   │   ├── Court.php
-│   │   ├── Booking.php
+│   │   ├── Booking.php             (isSlotAvailable bo qua pending het han)
 │   │   ├── Payment.php
 │   │   └── PricingRule.php
 │   └── Views/
 │       ├── layouts/ (main.php, admin.php)
 │       ├── home/
 │       ├── branches/
-│       ├── bookings/
-│       ├── auth/
+│       ├── bookings/ (create, confirm, payment, success, history, detail)
+│       ├── auth/     (login, register, profile)
 │       └── owner/
 ├── core/
 │   ├── Database.php   (PDO Singleton)
-│   ├── Session.php    (Session + CSRF)
+│   ├── Session.php    (Session + CSRF + Flash)
 │   ├── Router.php     (URL Router)
 │   ├── Controller.php (Base Controller)
 │   └── Model.php      (Base Model)
@@ -67,86 +110,66 @@ BadmintonBooking/
 ├── public/
 │   ├── index.php      (Entry point)
 │   ├── .htaccess
-│   └── assets/css/, js/, images/
+│   └── assets/css/, js/, images/ (qr-bank.png o day)
 ├── database/
 │   └── schema.sql
-└── tests/
-    └── BookingTest.php
+├── tests/
+│   └── BookingTest.php
+└── cron.php           (Auto-complete + Cleanup)
 ```
 
 ---
 
-##  Yêu Cầu Hệ Thống
+## Yeu Cau He Thong
 
 - **PHP** >= 8.1
 - **MySQL** >= 8.0
-- **Apache** với `mod_rewrite` enabled (hoặc Nginx)
+- **Apache** voi `mod_rewrite` enabled (hoac Nginx)
 - **PHP Extensions**: `pdo`, `pdo_mysql`, `mbstring`, `json`
 
 ---
 
-##  Cài Đặt
+## Cai Dat
 
-### 1. Clone / Copy dự án
+### 1. Clone / Copy du an
 
-Dự án **portable** — không hardcode đường dẫn. Bạn có thể đặt thư mục ở bất kỳ
-vị trí nào, với bất kỳ tên nào mà không cần sửa code.
+Du an **portable** — khong hardcode duong dan. Ban co the dat thu muc o bat ky vi tri nao.
 
 ```bash
-# Cách 1: Clone qua Git (khuyến nghị) vào web root
+# Cach 1: Clone qua Git (khuyen nghi) vao web root
 cd C:/xampp/htdocs
 git clone <your-repo-url> BadmintonBooking
 
-# Cách 2: Copy thư mục dự án vào web root
+# Cach 2: Copy thu muc du an vao web root
 cp -r BadmintonBooking/ C:/xampp/htdocs/
 ```
 
-> ℹ️ Tên thư mục (`BadmintonBooking`) có thể đổi tùy ý. Ứng dụng tự nhận diện
-> `BASE_URL` từ request nên không bị sai đường dẫn khi đổi máy/thư mục.
+> Ten thu muc (`BadmintonBooking`) co the doi tuy y. Ung dung tu nhan dien `BASE_URL` tu request.
 
-### 2. Database (tự động cài đặt) ✅
+### 2. Database (tu dong cai dat)
 
-Không cần làm gì! Ở lần truy cập **đầu tiên**, ứng dụng sẽ tự:
-1. Tạo file `.env` từ `.env.example` (nếu chưa có).
-2. Tạo database và import `database/schema.sql`.
+Khong can lam gi! O lan truy cap **dau tien**, ung dung se tu:
+1. Tao file `.env` tu `.env.example` (neu chua co).
+2. Tao database va import `database/schema.sql`.
 
-Điều kiện duy nhất: MySQL phải đang chạy và thông tin trong `.env` đúng
-(mặc định XAMPP là `root` / mật khẩu rỗng).
+Dieu kien: MySQL dang chay, thong tin trong `.env` dung (mac dinh XAMPP: `root` / mat khau rong).
 
-Nếu database của bạn dùng **mật khẩu khác**, hoặc muốn dùng tên DB khác,
-chỉnh `.env` trước khi chạy:
+Neu DB dung mat khau khac:
 ```env
 DB_HOST=localhost
 DB_DATABASE=badminton_booking
 DB_USERNAME=root
 DB_PASSWORD=your_password
-AUTO_INSTALL=true      # đặt false để tắt tự cài đặt
+AUTO_INSTALL=true      # dat false de tat tu cai dat
 ```
 
-> ℹ️ Sau khi cài xong, file `.installed` được tạo để bỏ qua bước này ở các lần sau.
-> Muốn cài lại/tạo lại DB: xoá file `.installed` rồi tải lại trang.
-> `APP_URL` **không bắt buộc** — chỉ cần khi chạy ngoài web entry point (CLI).
+> Sau khi cai xong, file `.installed` duoc tao. Muon cai lai: xoa file `.installed` roi tai lai trang.
 
-<details>
-<summary>Nếu muốn import thủ công (không dùng tự động)</summary>
+### 3. Cau hinh Web Server
 
-```bash
-# Tạo database trước, sau đó import (schema KHÔNG tự tạo database)
-mysql -u root -p -e "CREATE DATABASE badminton_booking CHARACTER SET utf8mb4"
-mysql -u root -p badminton_booking < database/schema.sql
-```
-
-Hoặc qua phpMyAdmin: tạo database `badminton_booking` → Import → chọn `database/schema.sql`.
-</details>
-
-### 3. Cấu hình Web Server
-
-**Apache (XAMPP):** Đảm bảo `mod_rewrite` đã bật:
+**Apache (XAMPP):**
 ```apache
-# Trong httpd.conf
 LoadModule rewrite_module modules/mod_rewrite.so
-
-# Trong VirtualHost hoặc Directory
 AllowOverride All
 ```
 
@@ -157,71 +180,98 @@ location / {
 }
 ```
 
-### 4. Truy cập ứng dụng
+### 4. QR Code Ngan Hang
+
+Dat file QR code vao:
+```
+public/assets/images/qr-bank.png
+```
+- Format: PNG/JPG, kich thuoc 200x200px (vuong)
+- Noi dung: Ma QR VietQR/VNPAY cua tai khoan SmashZone
+
+### 5. Truy cap ung dung
 
 ```
-http://localhost/<tên-thư-mục-của-bạn>/public/
-# Ví dụ: http://localhost/BadmintonBooking/public/
+http://localhost/<ten-thu-muc>/public/
+# Vi du: http://localhost/BadmintonBooking/public/
 ```
 
 ---
 
-## 🔑 Tài Khoản Mặc Định
+## Tai Khoan Mac Dinh
 
-| Loại | Username | Password |
+| Loai | Username | Password |
 |------|----------|----------|
 | Super Admin | `admin` | `admin123` |
 | Customer (test) | `test@smashzone.vn` | `password123` |
 
-Đường dẫn đăng nhập admin: `/owner/login`
+Dang nhap admin: `/owner/login`
 
 ---
 
-## 💰 Bảng Giá Sân
+## Bang Gia San
 
-| Khung Giờ | Ngày Thường | Cuối Tuần |
+| Khung Gio | Ngay Thuong | Cuoi Tuan |
 |-----------|-------------|-----------|
-| Thấp điểm (5:00-8:00, 14:00-17:00) | 80,000 đ/h | 96,000 đ/h |
-| Cao điểm (8:00-14:00, 17:00-22:00) | 150,000 đ/h | 180,000 đ/h |
+| Thap diem (5:00-8:00, 14:00-17:00) | 80,000 d/h | 96,000 d/h |
+| Cao diem (8:00-14:00, 17:00-22:00) | 150,000 d/h | 180,000 d/h |
 
 ---
 
-## 🧪 Chạy Tests
+## Chay Tests
 
 ```bash
-# Từ thư mục gốc dự án
+# Tu thu muc goc du an
 php tests/BookingTest.php
 ```
 
 ---
 
-## 📍 Danh Sách Chi Nhánh
+## Danh Sach Chi Nhanh (13 chi nhanh, 130 san)
 
-| # | Tên Chi Nhánh | Thành Phố |
+| # | Ten Chi Nhanh | Thanh Pho |
 |---|---------------|-----------|
-| 1-5 | SmashZone Cầu Giấy, Đống Đa, Tây Hồ, Hoàng Mai, Thanh Xuân | Hà Nội |
-| 6-9 | SmashZone Quận 1, Quận 7, Bình Thạnh, Gò Vấp | TP. HCM |
-| 10-11 | SmashZone Hải Châu, Thanh Khê | Đà Nẵng |
-| 12 | SmashZone Lê Chân | Hải Phòng |
-| 13 | SmashZone Ninh Kiều | Cần Thơ |
+| 1-5 | SmashZone Cau Giay, Dong Da, Tay Ho, Hoang Mai, Thanh Xuan | Ha Noi |
+| 6-9 | SmashZone Quan 1, Quan 7, Binh Thanh, Go Vap | TP. HCM |
+| 10-11 | SmashZone Hai Chau, Thanh Khe | Da Nang |
+| 12 | SmashZone Le Chan | Hai Phong |
+| 13 | SmashZone Ninh Kieu | Can Tho |
 
 ---
 
-## 🛠️ Công Nghệ Sử Dụng
+## Cong Nghe Su Dung
 
-- **Backend**: PHP 8.1 (Custom MVC Framework)
+- **Backend**: PHP 8.1 (Custom MVC Framework, no dependencies)
 - **Database**: MySQL 8.0
 - **Frontend**: HTML5, CSS3 (Vanilla), JavaScript (ES6+)
 - **Charts**: Chart.js
-- **Icons**: Emoji + Unicode
+- **Icons**: Unicode + SVG inline
 - **Fonts**: Inter (Google Fonts)
 
 ---
 
-## 📄 License
+## Thong Tin Lien He
 
-MIT License — Tự do sử dụng cho mục đích học tập và thương mại.
+- **Hotline**: 0976779516
+- **Email**: support@smashzone.vn
+- **Tru so**: So 4B, ngach 71, ngo 83 Tan Trieu, Ha Noi
 
 ---
 
-*Built with ❤️ by SmashZone Team*
+## License
+
+MIT License — Tu do su dung cho muc dich hoc tap va thuong mai.
+
+---
+
+## Changelog (Latest)
+
+- [x] Ho so ca nhan khach hang (cap nhat info, doi mat khau)
+- [x] Dropdown menu user tren header
+- [x] Thanh toan co countdown 3 phut, auto expire + giai phong san
+- [x] Booking Model: bo qua pending het han khi check slot
+- [x] Cron job: auto-complete + cleanup expired pending
+- [x] Admin workflow: Pending -> Confirmed -> Completed (tu dong)
+- [x] QR Code ngan hang dong tu file anh
+- [x] MoMo phone: 0981622131
+- [x] Footer: Hotline 0976779516, Tru so Ha Noi
