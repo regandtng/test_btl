@@ -6,7 +6,7 @@
  * 
  * Usage:
  *   php cron.php
- *   php cron.php --auto-complete
+ *   php cron.php --auto-expire
  *   php cron.php --clean-pending
  *   php cron.php --all
  */
@@ -40,17 +40,18 @@ function logMsg(string $msg) {
 }
 
 try {
-    if ($action === '--auto-complete' || $action === '--all') {
-        // Auto-complete confirmed bookings where end_time has passed
+    if ($action === '--auto-expire' || $action === '--all') {
+        // Auto-expire confirmed bookings where end_time has passed (slot released)
         $stmt = $pdo->prepare("
             UPDATE bookings 
-            SET status = 'completed', completed_at = NOW() 
+            SET status = 'cancelled',
+                notes = CONCAT(COALESCE(notes, ''), ' | Auto expire: hết giờ chơi')
             WHERE status = 'confirmed' 
             AND CONCAT(booking_date, ' ', end_time) < NOW()
         ");
         $stmt->execute();
         $count = $stmt->rowCount();
-        logMsg("Auto-completed $count ended sessions");
+        logMsg("Auto-expired $count ended sessions");
     }
 
     if ($action === '--clean-pending' || $action === '--all') {

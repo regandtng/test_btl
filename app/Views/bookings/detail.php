@@ -14,7 +14,6 @@
                     'pending'   => ['badge-warning', 'Chờ xác nhận'],
                     'confirmed' => ['badge-success', 'Đã xác nhận'],
                     'cancelled' => ['badge-danger', 'Đã hủy'],
-                    'completed' => ['badge-neutral', 'Hoàn thành'],
                 ];
                 $st = strtolower($booking['status'] ?? '');
                 $badge = $statusMap[$st] ?? ['badge-neutral', $booking['status'] ?? ''];

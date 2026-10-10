@@ -91,23 +91,27 @@ class OwnerController extends Controller
             [$todayStr]
         )->fetchColumn();
         $todayRevenue       = $db->query(
-            "SELECT COALESCE(SUM(total_price),0) FROM bookings WHERE booking_date = ? AND status IN ('confirmed','completed')",
+            "SELECT COALESCE(SUM(total_price),0) FROM bookings WHERE booking_date = ? AND status = 'confirmed'",
             [$todayStr]
         )->fetchColumn();
         $monthRevenue       = $db->query(
-            "SELECT COALESCE(SUM(total_price),0) FROM bookings WHERE DATE_FORMAT(booking_date,'%Y-%m') = ? AND status IN ('confirmed','completed')",
+            "SELECT COALESCE(SUM(total_price),0) FROM bookings WHERE DATE_FORMAT(booking_date,'%Y-%m') = ? AND status = 'confirmed'",
             [date('Y-m')]
         )->fetchColumn();
 
         // Revenue last 7 days for chart
         $revenueChart = [];
+        $chartLabels = [];
+        $chartData = [];
         for ($i = 6; $i >= 0; $i--) {
             $d   = date('Y-m-d', strtotime("-{$i} days"));
             $rev = $db->query(
-                "SELECT COALESCE(SUM(total_price),0) FROM bookings WHERE booking_date = ? AND status IN ('confirmed','completed')",
+                "SELECT COALESCE(SUM(total_price),0) FROM bookings WHERE booking_date = ? AND status = 'confirmed'",
                 [$d]
             )->fetchColumn();
             $revenueChart[] = ['date' => $d, 'revenue' => (int)$rev];
+            $chartLabels[] = date('d/m', strtotime($d));
+            $chartData[] = (int)$rev;
         }
 
         $recentBookings = $db->query(
@@ -126,6 +130,8 @@ class OwnerController extends Controller
             'todayRevenue'   => $todayRevenue,
             'monthRevenue'   => $monthRevenue,
             'revenueChart'   => $revenueChart,
+            'chartLabels'    => $chartLabels,
+            'chartData'      => $chartData,
             'recentBookings' => $recentBookings,
         ]);
     }
@@ -285,7 +291,7 @@ class OwnerController extends Controller
         $name      = trim($_POST['customer_name'] ?? '');
         $phone     = trim($_POST['customer_phone'] ?? '');
         $notes     = trim($_POST['notes'] ?? '');
-        $status    = in_array($_POST['status'] ?? '', ['pending', 'confirmed', 'completed'])
+        $status    = in_array($_POST['status'] ?? '', ['pending', 'confirmed'])
             ? $_POST['status'] : 'confirmed';
 
         $backUrl = '/owner/bookings?date=' . urlencode($date) . '&branch_id=' . $branchId;
@@ -342,7 +348,7 @@ class OwnerController extends Controller
 
         $id        = $_POST['id'] ?? null;
         $newStatus = $_POST['status'] ?? null;
-        $allowed   = ['pending', 'confirmed', 'cancelled', 'completed'];
+        $allowed   = ['pending', 'confirmed', 'cancelled'];
 
         if ($id && in_array($newStatus, $allowed)) {
             $db = Database::getInstance();
@@ -461,7 +467,7 @@ class OwnerController extends Controller
         $monthlyRevenue = [];
         for ($m = 1; $m <= 12; $m++) {
             $monthStr = date('Y') . '-' . sprintf('%02d', $m);
-            $sql = "SELECT COALESCE(SUM(total_price),0) FROM bookings WHERE DATE_FORMAT(booking_date,'%Y-%m') = ? AND status IN ('confirmed','completed')";
+            $sql = "SELECT COALESCE(SUM(total_price),0) FROM bookings WHERE DATE_FORMAT(booking_date,'%Y-%m') = ? AND status = 'confirmed'";
             $params = [$monthStr];
             if ($branchId) {
                 $sql .= " AND branch_id = ?";
@@ -475,7 +481,7 @@ class OwnerController extends Controller
         $branchRevenue = $db->query(
             "SELECT br.name, COALESCE(SUM(b.total_price),0) AS revenue
              FROM branches br
-             LEFT JOIN bookings b ON b.branch_id = br.id AND b.status IN ('confirmed','completed')
+             LEFT JOIN bookings b ON b.branch_id = br.id AND b.status = 'confirmed'
              WHERE br.is_active = 1
              GROUP BY br.id, br.name
              ORDER BY revenue DESC"

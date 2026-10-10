@@ -44,7 +44,7 @@ class Booking extends Model {
     }
 
     public function countConfirmed() {
-        $stmt = $this->db->query("SELECT COUNT(*) as cnt FROM {$this->table} WHERE status IN ('confirmed', 'completed')");
+        $stmt = $this->db->query("SELECT COUNT(*) as cnt FROM {$this->table} WHERE status = 'confirmed'");
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         return (int) $row['cnt'];
     }
@@ -58,7 +58,7 @@ class Booking extends Model {
     public function isSlotAvailable($courtId, $date, $startTime, $endTime) {
         $stmt = $this->db->prepare("
             SELECT COUNT(*) as cnt FROM {$this->table} 
-            WHERE court_id = ? AND booking_date = ? AND status IN ('confirmed', 'completed')
+            WHERE court_id = ? AND booking_date = ? AND status = 'confirmed'
             AND ((start_time < ? AND end_time > ?) OR (start_time >= ? AND start_time < ?))
             OR (court_id = ? AND booking_date = ? AND status = 'pending' AND expires_at > NOW()
                 AND ((start_time < ? AND end_time > ?) OR (start_time >= ? AND start_time < ?)))
@@ -80,7 +80,7 @@ class Booking extends Model {
             SELECT start_time, end_time FROM {$this->table}
             WHERE court_id = ? AND booking_date = ? 
             AND (
-                status IN ('confirmed', 'completed')
+                status = 'confirmed'
                 OR (status = 'pending' AND expires_at > NOW())
             )
         ");
@@ -132,7 +132,7 @@ class Booking extends Model {
     }
 
     public function getRevenue($branchId, $period = 'month') {
-        $condition = "branch_id = ? AND status = 'completed'";
+        $condition = "branch_id = ? AND status = 'confirmed'";
         if ($period == 'month') {
             $condition .= " AND MONTH(booking_date) = MONTH(CURRENT_DATE()) AND YEAR(booking_date) = YEAR(CURRENT_DATE())";
         } elseif ($period == 'today') {
@@ -146,13 +146,14 @@ class Booking extends Model {
     }
 
     /**
-     * Auto-complete confirmed bookings where end_time has passed (session timeout).
-     * Call via cron job every 5-10 minutes.
+     * Auto-expire confirmed bookings where end_time has passed (session timeout).
+     * Slot is released. Call via cron job every 5-10 minutes.
      */
-    public function autoCompleteEndedSessions() {
+    public function autoExpireEndedSessions() {
         $stmt = $this->db->prepare("
             UPDATE {$this->table} 
-            SET status = 'completed' 
+            SET status = 'cancelled',
+                notes = CONCAT(COALESCE(notes, ''), ' | Auto expire: hết giờ chơi')
             WHERE status = 'confirmed' 
             AND CONCAT(booking_date, ' ', end_time) < NOW()
         ");

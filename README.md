@@ -23,7 +23,7 @@
 - Quan ly lich dat: loc theo ngay/chi nhanh/trang thai, cap nhat trang thai
 - Quan ly bang gia theo khung gio va loai ngay
 - Xem doanh thu theo thang, theo chi nhanh (Chart.js)
-- **Workflow trang thai ro rang**: Pending (cho thanh toan) -> Confirmed (da xac nhan) -> Completed (tu dong sau gio choi)
+- **Workflow trang thai ro rang**: Pending (cho thanh toan) -> Confirmed (da xac nhan) -> Cancelled (tu dong khi het gio)
 
 ---
 
@@ -39,12 +39,10 @@ CONFIRMED
     | Da thanh toan (QR/MoMo/COD)
     | San khoa chac chan
     v
-COMPLETED (Tu dong)
+CANCELLED (Tu dong khi het gio)
     | Het gio choi (end_time < NOW)
-    | Cron chay 5-10p/l tu chuyen
-    v
-CANCELLED
-    | Huy boi khach/admin/auto-expired
+    | Cron chay 5-10p/l tu chuyen confirmed -> cancelled
+    | San duoc GIAI PHONG, khach khac co the dat lai
 ```
 
 ---
@@ -55,7 +53,7 @@ File: `cron.php` — Chay dinh ky 5-10 phut/lan qua Windows Task Scheduler
 
 | Chuc nang | SQL |
 |-----------|-----|
-| **Auto-complete** | `confirmed` + `end_time < NOW()` -> `completed` |
+| **Auto-expire** | `confirmed` + `end_time < NOW()` -> `cancelled` (giai phong san) |
 | **Cleanup pending** | `pending` + `expires_at < NOW()` -> `cancelled` |
 
 **Cai dat Windows Task Scheduler:**
@@ -270,8 +268,8 @@ MIT License — Tu do su dung cho muc dich hoc tap va thuong mai.
 - [x] Dropdown menu user tren header
 - [x] Thanh toan co countdown 3 phut, auto expire + giai phong san
 - [x] Booking Model: bo qua pending het han khi check slot
-- [x] Cron job: auto-complete + cleanup expired pending
-- [x] Admin workflow: Pending -> Confirmed -> Completed (tu dong)
+- [x] Cron job: auto-expire + cleanup expired pending
+- [x] Admin workflow: Pending -> Confirmed -> Cancelled (tu dong khi het gio, giai phong san)
 - [x] QR Code ngan hang dong tu file anh
 - [x] MoMo phone: 0981622131
 - [x] Footer: Hotline 0976779516, Tru so Ha Noi

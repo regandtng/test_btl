@@ -44,7 +44,6 @@
                             'pending'   => ['badge-warning', 'Chờ xác nhận'],
                             'confirmed' => ['badge-success', 'Đã xác nhận'],
                             'cancelled' => ['badge-danger', 'Đã hủy'],
-                            'completed' => ['badge-neutral', 'Hoàn thành'],
                         ];
                         foreach($bookings as $b):
                             $st = strtolower($b['status']);

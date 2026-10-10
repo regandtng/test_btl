@@ -26,7 +26,7 @@
                 </option>
             <?php endforeach; ?>
         </select>
-        <span style="color:#aaa; font-size:14px;">Năm <?= date('Y') ?> · Chỉ tính đơn đã xác nhận/hoàn thành</span>
+        <span style="color:#aaa; font-size:14px;">Năm <?= date('Y') ?> · Chỉ tính đơn đã xác nhận</span>
     </form>
 
     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 20px;">
@@ -87,7 +87,7 @@
     <div class="panel" style="margin-top: 20px;">
         <h3 style="margin-top:0;">Tình Trạng Đặt Sân</h3>
         <?php
-        $statusMap = ['pending' => 'Chờ xác nhận', 'confirmed' => 'Đã xác nhận', 'completed' => 'Hoàn thành', 'cancelled' => 'Đã hủy'];
+        $statusMap = ['pending' => 'Chờ xác nhận', 'confirmed' => 'Đã xác nhận', 'cancelled' => 'Đã hủy'];
         $breakdown = $statusBreakdown ?? [];
         ?>
         <?php if (empty($breakdown)): ?>

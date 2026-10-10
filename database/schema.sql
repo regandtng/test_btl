@@ -49,7 +49,7 @@ CREATE TABLE bookings (
     end_time TIME NOT NULL,
     duration_hours DECIMAL(4,2) NOT NULL,
     total_price DECIMAL(10,2) NOT NULL,
-    status ENUM('pending', 'confirmed', 'cancelled', 'completed') DEFAULT 'pending',
+    status ENUM('pending', 'confirmed', 'cancelled') DEFAULT 'pending',
     notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,

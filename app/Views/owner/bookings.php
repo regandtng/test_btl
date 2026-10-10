@@ -13,7 +13,6 @@ th { background: rgba(0,0,0,0.3); color: #2979ff; font-size: 13px; text-transfor
 .status-select.pending { color: #ffb300; border-color: #ffb300; }
 .status-select.confirmed { color: #00e676; border-color: #00e676; }
 .status-select.cancelled { color: #ff4d4d; border-color: #ff4d4d; }
-.status-select.completed { color: #2979ff; border-color: #2979ff; }
 
 .header-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
 .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 1000; align-items: center; justify-content: center; }
@@ -58,7 +57,6 @@ th { background: rgba(0,0,0,0.3); color: #2979ff; font-size: 13px; text-transfor
                 <option value="">Tất cả</option>
                 <option value="pending" <?= (($status ?? '') === 'pending') ? 'selected' : '' ?>>Chờ xác nhận</option>
                 <option value="confirmed" <?= (($status ?? '') === 'confirmed') ? 'selected' : '' ?>>Đã xác nhận</option>
-                <option value="completed" <?= (($status ?? '') === 'completed') ? 'selected' : '' ?>>Hoàn thành</option>
                 <option value="cancelled" <?= (($status ?? '') === 'cancelled') ? 'selected' : '' ?>>Đã hủy</option>
             </select>
         </div>
@@ -102,7 +100,6 @@ th { background: rgba(0,0,0,0.3); color: #2979ff; font-size: 13px; text-transfor
                             <select name="status" class="status-select <?= strtolower($b['status']) ?>" onchange="this.form.submit()">
                                 <option value="pending" <?= $b['status']=='pending'?'selected':'' ?>>Chờ thanh toán</option>
                                 <option value="confirmed" <?= $b['status']=='confirmed'?'selected':'' ?>>Đã xác nhận</option>
-                                <option value="completed" <?= $b['status']=='completed'?'selected':'' ?>>Hoàn thành</option>
                                 <option value="cancelled" <?= $b['status']=='cancelled'?'selected':'' ?>>Đã hủy</option>
                             </select>
                         </form>
@@ -147,7 +144,6 @@ th { background: rgba(0,0,0,0.3); color: #2979ff; font-size: 13px; text-transfor
                     <select name="status" class="form-control">
                         <option value="confirmed" selected>Đã xác nhận</option>
                         <option value="pending">Chờ xác nhận</option>
-                        <option value="completed">Hoàn thành</option>
                     </select>
                 </div>
             </div>
