@@ -1,0 +1,9 @@
+/vendor/
+/node_modules/
+.env
+.env.backup
+.installed
+.DS_Store
+Thumbs.db
+*.log
+/public/assets/uploads/
