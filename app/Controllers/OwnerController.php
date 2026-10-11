@@ -291,7 +291,7 @@ class OwnerController extends Controller
         $name      = trim($_POST['customer_name'] ?? '');
         $phone     = trim($_POST['customer_phone'] ?? '');
         $notes     = trim($_POST['notes'] ?? '');
-        $status    = in_array($_POST['status'] ?? '', ['pending', 'confirmed'])
+        $status    = in_array($_POST['status'] ?? '', ['pending_payment', 'confirmed'])
             ? $_POST['status'] : 'confirmed';
 
         $backUrl = '/owner/bookings?date=' . urlencode($date) . '&branch_id=' . $branchId;
@@ -348,7 +348,7 @@ class OwnerController extends Controller
 
         $id        = $_POST['id'] ?? null;
         $newStatus = $_POST['status'] ?? null;
-        $allowed   = ['pending', 'confirmed', 'cancelled'];
+        $allowed   = ['pending_payment', 'confirmed', 'cancelled'];
 
         if ($id && in_array($newStatus, $allowed)) {
             $db = Database::getInstance();

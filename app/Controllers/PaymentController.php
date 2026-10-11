@@ -25,21 +25,12 @@ class PaymentController extends Controller
             $this->redirect("/booking/success/{$bookingId}");
         }
 
-        // Kiểm tra booking pending đã hết hạn (3 phút)
-        if ($booking['status'] === 'pending' && $booking['expires_at']) {
-            $now = new DateTime();
-            $expires = new DateTime($booking['expires_at']);
-            if ($now >= $expires) {
-                // Auto cancel booking hết hạn
-                $bookingModel->update($bookingId, [
-                    'status' => 'cancelled',
-                    'notes' => ($booking['notes'] ? $booking['notes'] . ' | ' : '') . 'Auto cancel: quá hạn thanh toán 3 phút'
-                ]);
-                Session::set('pending_booking', null);
-                Session::flash('error', 'Đã quá 3 phút thanh toán. Đơn đặt sân đã bị hủy tự động, sân đã được giải phóng.');
-                $this->redirect('/branches');
-            }
+        // Chặn các trạng thái không cho phép thanh toán
+        if (in_array($booking['status'], ['cancelled', 'completed'])) {
+            Session::flash('error', 'Đơn đặt sân đã bị hủy hoặc hoàn tất.');
+            $this->redirect('/branches');
         }
+        // Cho phép pending, pending_payment và các status khác (trừ confirmed/cancelled)
 
         $paymentMethods = [
             ['id' => 'qr',   'label' => 'Chuyển khoản QR',  'icon' => '🏦', 'desc' => 'Quét QR qua app ngân hàng'],
@@ -75,36 +66,36 @@ class PaymentController extends Controller
             $this->redirect('/');
         }
 
-        // Kiểm tra booking pending đã hết hạn
-        if ($booking['status'] === 'pending' && $booking['expires_at']) {
-            $now = new DateTime();
-            $expires = new DateTime($booking['expires_at']);
-            if ($now >= $expires) {
-                $bookingModel->update($bookingId, [
-                    'status' => 'cancelled',
-                    'notes' => ($booking['notes'] ? $booking['notes'] . ' | ' : '') . 'Auto cancel: quá hạn thanh toán 3 phút'
-                ]);
-                Session::flash('error', 'Đã quá 3 phút thanh toán. Đơn đặt sân đã bị hủy tự động.');
-                $this->redirect('/branches');
-            }
+        // Chặn các trạng thái không cho phép thanh toán
+        if (in_array($booking['status'], ['cancelled', 'completed'])) {
+            Session::flash('error', 'Đơn đặt sân đã bị hủy hoặc hoàn tất.');
+            $this->redirect('/branches');
         }
+        // Cho phép pending, pending_payment và các status khác (trừ confirmed/cancelled)
 
         // Create payment record
         $transactionId = 'TXN-' . strtoupper(uniqid());
+        
+        // Xác định trạng thái booking theo phương thức thanh toán
+        $isCash = $method === 'cash';
+        $bookingStatus = $isCash ? 'pending_payment' : 'confirmed';
+        $paymentStatus = $isCash ? 'pending' : 'paid';
+        $paidAt = $isCash ? null : date('Y-m-d H:i:s');
+        
         $paymentModel->create([
             'booking_id'     => $bookingId,
             'method'         => $method,
             'amount'         => $booking['total_price'],
-            'status'         => $method === 'cash' ? 'pending' : 'paid',
+            'status'         => $paymentStatus,
             'transaction_id' => $transactionId,
-            'paid_at'        => $method !== 'cash' ? date('Y-m-d H:i:s') : null,
+            'paid_at'        => $paidAt,
         ]);
 
-        // Update booking status (slot is reserved in both cases)
-        $bookingModel->update($bookingId, ['status' => 'confirmed']);
+        // Update booking status
+        $bookingModel->update($bookingId, ['status' => $bookingStatus]);
 
-        if ($method === 'cash') {
-            Session::flash('success', 'Đặt sân thành công! Vui lòng thanh toán tiền mặt tại sân khi đến nhận sân.');
+        if ($isCash) {
+            Session::flash('success', 'Đặt sân thành công! Trạng thái: Chờ thanh toán tiền mặt tại sân. Admin sẽ xác nhận khi bạn đến nhận sân.');
         } else {
             Session::flash('success', 'Thanh toán thành công! Mã đặt sân của bạn đã được xác nhận.');
         }

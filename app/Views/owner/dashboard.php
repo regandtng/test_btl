@@ -15,7 +15,7 @@ table { width: 100%; border-collapse: collapse; }
 th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); color: #fff; }
 th { color: #2979ff; font-size: 14px; text-transform: uppercase; }
 .badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
-.badge.pending { background: rgba(255, 179, 0, 0.2); color: #ffb300; }
+.badge.pending_payment { background: rgba(255, 179, 0, 0.2); color: #ffb300; }
 .badge.confirmed { background: rgba(0, 230, 118, 0.2); color: #00e676; }
 </style>
 

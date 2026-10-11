@@ -58,13 +58,10 @@ class Booking extends Model {
     public function isSlotAvailable($courtId, $date, $startTime, $endTime) {
         $stmt = $this->db->prepare("
             SELECT COUNT(*) as cnt FROM {$this->table} 
-            WHERE court_id = ? AND booking_date = ? AND status = 'confirmed'
+            WHERE court_id = ? AND booking_date = ? AND status IN ('confirmed', 'pending_payment')
             AND ((start_time < ? AND end_time > ?) OR (start_time >= ? AND start_time < ?))
-            OR (court_id = ? AND booking_date = ? AND status = 'pending' AND expires_at > NOW()
-                AND ((start_time < ? AND end_time > ?) OR (start_time >= ? AND start_time < ?)))
         ");
         $stmt->execute([
-            $courtId, $date, $endTime, $startTime, $startTime, $endTime,
             $courtId, $date, $endTime, $startTime, $startTime, $endTime
         ]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -79,10 +76,7 @@ class Booking extends Model {
         $stmt = $this->db->prepare("
             SELECT start_time, end_time FROM {$this->table}
             WHERE court_id = ? AND booking_date = ? 
-            AND (
-                status = 'confirmed'
-                OR (status = 'pending' AND expires_at > NOW())
-            )
+            AND status IN ('confirmed', 'pending_payment')
         ");
         $stmt->execute([$courtId, $date]);
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -154,7 +148,7 @@ class Booking extends Model {
             UPDATE {$this->table} 
             SET status = 'cancelled',
                 notes = CONCAT(COALESCE(notes, ''), ' | Auto expire: hết giờ chơi')
-            WHERE status = 'confirmed' 
+            WHERE status IN ('confirmed', 'pending_payment') 
             AND CONCAT(booking_date, ' ', end_time) < NOW()
         ");
         $stmt->execute();

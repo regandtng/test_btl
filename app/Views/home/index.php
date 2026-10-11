@@ -85,7 +85,7 @@
         
         <div class="row g-4">
             <div class="col-md-3">
-                <div class="card card-hover p-4 h-100 border text-center">
+                <div class="p-4 h-100 text-center">
                     <div class="step-num mb-3 mx-auto d-flex align-items-center justify-content-center" style="width: 52px; height: 52px; background: linear-gradient(135deg,#ecfdf5,#d1fae5); color: #047857; font-weight: 800; font-size: 1.1rem; border-radius: 16px; border: 1px solid #a7f3d0;">
                         01
                     </div>
@@ -95,7 +95,7 @@
             </div>
 
             <div class="col-md-3">
-                <div class="card card-hover p-4 h-100 border text-center">
+                <div class="p-4 h-100 text-center">
                     <div class="step-num mb-3 mx-auto d-flex align-items-center justify-content-center" style="width: 52px; height: 52px; background: linear-gradient(135deg,#ecfdf5,#d1fae5); color: #047857; font-weight: 800; font-size: 1.1rem; border-radius: 16px; border: 1px solid #a7f3d0;">
                         02
                     </div>
@@ -105,7 +105,7 @@
             </div>
 
             <div class="col-md-3">
-                <div class="card card-hover p-4 h-100 border text-center">
+                <div class="p-4 h-100 text-center">
                     <div class="step-num mb-3 mx-auto d-flex align-items-center justify-content-center" style="width: 52px; height: 52px; background: linear-gradient(135deg,#ecfdf5,#d1fae5); color: #047857; font-weight: 800; font-size: 1.1rem; border-radius: 16px; border: 1px solid #a7f3d0;">
                         03
                     </div>
@@ -115,7 +115,7 @@
             </div>
 
             <div class="col-md-3">
-                <div class="card card-hover p-4 h-100 border text-center">
+                <div class="p-4 h-100 text-center">
                     <div class="step-num mb-3 mx-auto d-flex align-items-center justify-content-center" style="width: 52px; height: 52px; background: linear-gradient(135deg,#ecfdf5,#d1fae5); color: #047857; font-weight: 800; font-size: 1.1rem; border-radius: 16px; border: 1px solid #a7f3d0;">
                         04
                     </div>
@@ -156,8 +156,8 @@
                                 <span class="badge badge-success"><?= htmlspecialchars($branch['courts_count']) ?> Sân hoạt động</span>
                             </div>
                             <h3 class="h5 font-weight-700 text-dark mb-2"><?= htmlspecialchars($branch['name']) ?></h3>
-                            <p class="text-muted fs-sm mb-2">📍 <?= htmlspecialchars($branch['address']) ?></p>
-                            <p class="text-muted fs-sm mb-4">⏰ Mở cửa: <?= htmlspecialchars($branch['open_hours'] ?? trim(($branch['open_time'] ?? '05:00:00') . ' - ' . ($branch['close_time'] ?? '22:00:00'))) ?></p>
+                            <p class="text-muted fs-sm mb-2">Địa chỉ: <?= htmlspecialchars($branch['address']) ?></p>
+                            <p class="text-muted fs-sm mb-4"> Mở cửa: <?= htmlspecialchars($branch['open_hours'] ?? trim(($branch['open_time'] ?? '05:00:00') . ' - ' . ($branch['close_time'] ?? '22:00:00'))) ?></p>
                         </div>
                         <a href="<?= BASE_URL ?>/branch/<?= htmlspecialchars($branch['id']) ?>" class="btn btn-accent w-100 mt-auto py-2">
                             Chi Tiết & Đặt Sân

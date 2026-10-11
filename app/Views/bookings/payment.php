@@ -12,7 +12,6 @@
         <!-- Countdown Timer -->
         <div class="countdown-banner" id="countdownBanner">
             <div class="countdown-content">
-                <span class="countdown-icon">⏱️</span>
                 <span class="countdown-text">Thời gian thanh toán còn lại: <strong id="countdownTimer">03:00</strong></span>
                 <span class="countdown-hint">Quá 3 phút đơn sẽ bị hủy tự động</span>
             </div>

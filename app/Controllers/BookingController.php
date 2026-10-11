@@ -157,9 +157,7 @@ class BookingController extends Controller
             $this->redirect('/branches');
         }
 
-        // Tạo booking pending, hết hạn sau 3 phút
-        $expiresAt = date('Y-m-d H:i:s', strtotime('+3 minutes'));
-        
+        // Tạo booking - status mặc định pending_payment, sẽ cập nhật ở trang thanh toán
         $bookingId = $bookingModel->create([
             'booking_code'   => $bookingModel->generateBookingCode(),
             'user_id'        => Session::get('user_id'),
@@ -173,8 +171,7 @@ class BookingController extends Controller
             'end_time'       => sprintf('%02d:00:00', $pending['end_hour']),
             'duration_hours' => $pending['end_hour'] - $pending['start_hour'],
             'total_price'    => $pending['total_price'],
-            'status'         => 'pending',
-            'expires_at'     => $expiresAt,
+            'status'         => 'pending_payment',
             'notes'          => $notes,
         ]);
 

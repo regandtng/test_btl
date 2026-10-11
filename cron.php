@@ -46,7 +46,7 @@ try {
             UPDATE bookings 
             SET status = 'cancelled',
                 notes = CONCAT(COALESCE(notes, ''), ' | Auto expire: hết giờ chơi')
-            WHERE status = 'confirmed' 
+            WHERE status IN ('confirmed', 'pending_payment') 
             AND CONCAT(booking_date, ' ', end_time) < NOW()
         ");
         $stmt->execute();
