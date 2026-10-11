@@ -1,16 +1,27 @@
 <?php ob_start(); ?>
-<?php $isCash = (($payment['method'] ?? '') === 'cash'); ?>
+<?php 
+$paymentMethod = $payment['method'] ?? '';
+$isCash = $paymentMethod === 'cash';
+$isPending = ($booking['status'] ?? '') === 'pending';
+$isConfirmed = ($booking['status'] ?? '') === 'confirmed';
+?>
 
 <div class="page-wrap">
     <div class="container" style="max-width:640px;">
         <div class="card p-5 text-center">
-            <div class="success-badge">✓</div>
-            <h1 class="h2 text-accent mb-2">GỬI YÊU CẦU THÀNH CÔNG!</h1>
+            <div class="success-badge"><?= $isConfirmed ? '✓' : '⏳' ?></div>
+            <h1 class="h2 <?= $isConfirmed ? 'text-accent' : 'text-warning' ?> mb-2">
+                <?= $isConfirmed ? 'ĐÃ XÁC NHẬN ĐẶT SÂN!' : 'ĐANG CHỜ XỬ LÝ' ?>
+            </h1>
             <p class="text-muted">
-                <?php if ($isCash): ?>
-                    Yêu cầu đặt sân đã được ghi nhận. Vui lòng thanh toán tiền mặt tại sân khi đến nhận sân.
+                <?php if ($isPending): ?>
+                    Yêu cầu đặt sân đã được gửi. Admin sẽ xem xét và xác nhận trong thời gian sớm nhất.
+                <?php elseif ($isConfirmed && $isCash): ?>
+                    Đặt sân thành công! Vui lòng thanh toán tiền mặt tại sân khi đến nhận sân.
+                <?php elseif ($isConfirmed): ?>
+                    Thanh toán thành công! Mã đặt sân của bạn đã được xác nhận.
                 <?php else: ?>
-                    Yêu cầu thanh toán đã được gửi. Cảm ơn bạn đã đặt sân tại SmashZone.
+                    Yêu cầu đặt sân đã được ghi nhận.
                 <?php endif; ?>
             </p>
 
@@ -41,7 +52,7 @@
                 </div>
             </div>
 
-            <?php if ($isCash): ?>
+            <?php if ($isCash && $isConfirmed): ?>
             <div class="cash-notice">
                 💵 Quý khách vui lòng thanh toán <strong><?= number_format($booking['total_price'] ?? ($price ?? 0)) ?>đ</strong> bằng tiền mặt tại quầy lễ tân khi đến nhận sân.
             </div>
@@ -70,5 +81,6 @@
 @keyframes pop { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 .cash-notice { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; border-radius: var(--radius); padding: 0.85rem 1rem; font-size: 0.92rem; font-weight: 600; margin-bottom: 1.5rem; text-align: left; }
 .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; text-align: left; margin: 1.5rem 0; background: #f8fafc; padding: 1.25rem; border-radius: var(--radius); border: 1px solid var(--border); }
+.text-warning { color: #ffb300 !important; }
 </style>
 <?php $content = ob_get_clean(); require __DIR__ . '/../layouts/main.php'; ?>

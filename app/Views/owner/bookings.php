@@ -10,7 +10,7 @@ table { width: 100%; border-collapse: collapse; color: #fff; white-space: nowrap
 th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.05); }
 th { background: rgba(0,0,0,0.3); color: #2979ff; font-size: 13px; text-transform: uppercase; }
 .status-select { background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 5px; border-radius: 4px; outline: none; }
-.status-select.pending_payment { color: #ffb300; border-color: #ffb300; }
+.status-select.pending { color: #ffb300; border-color: #ffb300; }
 .status-select.confirmed { color: #00e676; border-color: #00e676; }
 .status-select.cancelled { color: #ff4d4d; border-color: #ff4d4d; }
 
@@ -55,7 +55,7 @@ th { background: rgba(0,0,0,0.3); color: #2979ff; font-size: 13px; text-transfor
             <label>Trạng thái</label>
             <select name="status" class="form-control">
                 <option value="">Tất cả</option>
-                <option value="pending_payment" <?= (($status ?? '') === 'pending_payment') ? 'selected' : '' ?>>Chờ thanh toán</option>
+                <option value="pending" <?= (($status ?? '') === 'pending') ? 'selected' : '' ?>>Đang chờ xử lý</option>
                 <option value="confirmed" <?= (($status ?? '') === 'confirmed') ? 'selected' : '' ?>>Đã xác nhận</option>
                 <option value="cancelled" <?= (($status ?? '') === 'cancelled') ? 'selected' : '' ?>>Đã hủy</option>
             </select>
@@ -98,7 +98,7 @@ th { background: rgba(0,0,0,0.3); color: #2979ff; font-size: 13px; text-transfor
                         <form action="<?= BASE_URL ?>/owner/booking/update" method="POST" style="margin:0;">
                             <input type="hidden" name="id" value="<?= $b['id'] ?>">
                             <select name="status" class="status-select <?= strtolower($b['status']) ?>" onchange="this.form.submit()">
-                                <option value="pending_payment" <?= $b['status']=='pending_payment'?'selected':'' ?>>Chờ thanh toán</option>
+                                <option value="pending" <?= $b['status']=='pending'?'selected':'' ?>>Đang chờ xử lý</option>
                                 <option value="confirmed" <?= $b['status']=='confirmed'?'selected':'' ?>>Đã xác nhận</option>
                                 <option value="cancelled" <?= $b['status']=='cancelled'?'selected':'' ?>>Đã hủy</option>
                             </select>
@@ -143,7 +143,7 @@ th { background: rgba(0,0,0,0.3); color: #2979ff; font-size: 13px; text-transfor
                     <label>Trạng thái</label>
                     <select name="status" class="form-control">
                         <option value="confirmed" selected>Đã xác nhận</option>
-                        <option value="pending_payment">Chờ thanh toán</option>
+                        <option value="pending">Đang chờ xử lý</option>
                     </select>
                 </div>
             </div>

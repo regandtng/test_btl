@@ -11,9 +11,9 @@
                 <h1 class="page-title m-0" style="font-size:1.6rem;">Chi Tiết Đặt Sân</h1>
                 <?php
                 $statusMap = [
-                    'pending_payment' => ['badge-warning', 'Chờ thanh toán'],
-                    'confirmed'       => ['badge-success', 'Đã xác nhận'],
-                    'cancelled'       => ['badge-danger', 'Đã hủy'],
+                    'pending'   => ['badge-warning', 'Đang chờ xử lý'],
+                    'confirmed' => ['badge-success', 'Đã xác nhận'],
+                    'cancelled' => ['badge-danger', 'Đã hủy'],
                 ];
                 $st = strtolower($booking['status'] ?? '');
                 $badge = $statusMap[$st] ?? ['badge-neutral', $booking['status'] ?? ''];

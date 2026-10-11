@@ -157,7 +157,7 @@ class BookingController extends Controller
             $this->redirect('/branches');
         }
 
-        // Tạo booking - status mặc định pending_payment, sẽ cập nhật ở trang thanh toán
+        // Tạo booking - status pending, chờ admin duyệt
         $bookingId = $bookingModel->create([
             'booking_code'   => $bookingModel->generateBookingCode(),
             'user_id'        => Session::get('user_id'),
@@ -171,7 +171,7 @@ class BookingController extends Controller
             'end_time'       => sprintf('%02d:00:00', $pending['end_hour']),
             'duration_hours' => $pending['end_hour'] - $pending['start_hour'],
             'total_price'    => $pending['total_price'],
-            'status'         => 'pending_payment',
+            'status'         => 'pending',
             'notes'          => $notes,
         ]);
 

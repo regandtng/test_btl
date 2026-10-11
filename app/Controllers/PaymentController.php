@@ -25,12 +25,10 @@ class PaymentController extends Controller
             $this->redirect("/booking/success/{$bookingId}");
         }
 
-        // Chặn các trạng thái không cho phép thanh toán
-        if (in_array($booking['status'], ['cancelled', 'completed'])) {
-            Session::flash('error', 'Đơn đặt sân đã bị hủy hoặc hoàn tất.');
+        if ($booking['status'] === 'cancelled') {
+            Session::flash('error', 'Đơn đặt sân đã bị hủy.');
             $this->redirect('/branches');
         }
-        // Cho phép pending, pending_payment và các status khác (trừ confirmed/cancelled)
 
         $paymentMethods = [
             ['id' => 'qr',   'label' => 'Chuyển khoản QR',  'icon' => '🏦', 'desc' => 'Quét QR qua app ngân hàng'],
@@ -66,21 +64,15 @@ class PaymentController extends Controller
             $this->redirect('/');
         }
 
-        // Chặn các trạng thái không cho phép thanh toán
-        if (in_array($booking['status'], ['cancelled', 'completed'])) {
-            Session::flash('error', 'Đơn đặt sân đã bị hủy hoặc hoàn tất.');
+        if ($booking['status'] === 'cancelled') {
+            Session::flash('error', 'Đơn đặt sân đã bị hủy.');
             $this->redirect('/branches');
         }
-        // Cho phép pending, pending_payment và các status khác (trừ confirmed/cancelled)
 
-        // Create payment record
+        // Create payment record - booking vẫn ở pending, chờ admin duyệt
         $transactionId = 'TXN-' . strtoupper(uniqid());
-        
-        // Xác định trạng thái booking theo phương thức thanh toán
-        $isCash = $method === 'cash';
-        $bookingStatus = $isCash ? 'pending_payment' : 'confirmed';
-        $paymentStatus = $isCash ? 'pending' : 'paid';
-        $paidAt = $isCash ? null : date('Y-m-d H:i:s');
+        $paymentStatus = $method === 'cash' ? 'pending' : 'paid';
+        $paidAt = $method === 'cash' ? null : date('Y-m-d H:i:s');
         
         $paymentModel->create([
             'booking_id'     => $bookingId,
@@ -91,14 +83,11 @@ class PaymentController extends Controller
             'paid_at'        => $paidAt,
         ]);
 
-        // Update booking status
-        $bookingModel->update($bookingId, ['status' => $bookingStatus]);
-
-        if ($isCash) {
-            Session::flash('success', 'Đặt sân thành công! Trạng thái: Chờ thanh toán tiền mặt tại sân. Admin sẽ xác nhận khi bạn đến nhận sân.');
-        } else {
-            Session::flash('success', 'Thanh toán thành công! Mã đặt sân của bạn đã được xác nhận.');
-        }
+        // Booking KHÔNG đổi status, vẫn pending chờ admin duyệt
+        $msg = $method === 'cash' 
+            ? 'Đã ghi nhận chọn tiền mặt. Đơn đang chờ admin xác nhận.' 
+            : 'Đã ghi nhận thanh toán online. Đơn đang chờ admin xác nhận.';
+        Session::flash('success', $msg);
         $this->redirect("/booking/success/{$bookingId}");
     }
 }

@@ -41,9 +41,9 @@
                     <tbody>
                         <?php
                         $statusMap = [
-                            'pending_payment' => ['badge-warning', 'Chờ thanh toán'],
-                            'confirmed'       => ['badge-success', 'Đã xác nhận'],
-                            'cancelled'       => ['badge-danger', 'Đã hủy'],
+                            'pending'   => ['badge-warning', 'Đang chờ xử lý'],
+                            'confirmed' => ['badge-success', 'Đã xác nhận'],
+                            'cancelled' => ['badge-danger', 'Đã hủy'],
                         ];
                         foreach($bookings as $b):
                             $st = strtolower($b['status']);
